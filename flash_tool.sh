@@ -45,12 +45,9 @@ if [ "$updated" == "true" ]; then
 fi
 
 usage() {
-	echo -e "\nUsage: rk3x \n"
-	echo -e "	emmc: build/flash_tool.sh -c rk3288  -p system -i out/system.img  \n"
-	echo -e "	sdcard: build/flash_tool.sh -c rk3288  -d /dev/sdb -p system  -i out/system.img \n"
-	echo -e "\nUsage: rv \n"
-	echo -e "	sdcard: build/flash_tool.sh -c rk1108 -i out/firmware.img \n"
-
+	echo -e "\nUsage: emmc: build/flash_tool.sh -c rk3288  -p system -i out/system.img  \n"
+	echo -e "       sdcard: build/flash_tool.sh -c rk3288  -d /dev/sdb -p system  -i out/system.img \n"
+	echo -e "       rockusb: build/flash_tool.sh -p system  -i out/system.img \n"
 }
 
 finish() {
@@ -69,7 +66,7 @@ while getopts "c:t:s:d:p:r:d:i:h" flag; do
 			;;
 		i)
 			IMAGE="$OPTARG"
-			if [ ! -e ${IMAGE} ]; then
+			if [ ! -f "${IMAGE}" ]; then
 				echo -e "\e[31m CAN'T FIND IMAGE \e[0m"
 				usage
 				exit
@@ -99,14 +96,14 @@ fi
 flash_upgt() {
 	if [ "${CHIP}" == "rk3288" ]; then
 		sudo $TOOLPATH/rkdeveloptool db ${LOCALPATH}/rkbin/rk32/rk3288_ubootloader_*.bin
+	elif [ "${CHIP}" == "rk322x" ]; then
+		sudo $TOOLPATH/rkdeveloptool db ${LOCALPATH}/rkbin/rk32/rk322x_loader_*.bin
 	elif [ "${CHIP}" == "rk3036" ]; then
 		sudo $TOOLPATH/rkdeveloptool db ${LOCALPATH}/rkbin/rk30/rk3036_loader_*.bin
 	elif [ "${CHIP}" == "rk3399" ]; then
 		sudo $TOOLPATH/rkdeveloptool db ${LOCALPATH}/rkbin/rk33/rk3399_loader_*.bin
 	elif [ "${CHIP}" == "rk3328" ]; then
 		sudo $TOOLPATH/rkdeveloptool db ${LOCALPATH}/rkbin/rk33/rk3328_loader_*.bin
-	elif [ "${CHIP}" == "rv1108" ]; then
-		sudo $TOOLPATH/rkdeveloptool db ${LOCALPATH}/rkbin/rv1x/RK1108_usb_boot.bin
 	fi
 
 	sleep 1
