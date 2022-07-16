@@ -7,7 +7,7 @@ KDEB_PKGVERSION ?= $(KERNEL_VERSION)-$(RELEASE_NUMBER)-rockchip
 
 KERNEL_MAKE ?= make \
 	ARCH=arm64 \
-	CROSS_COMPILE="/usr/local/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-"
+	CROSS_COMPILE="/usr/local/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/linux-x86/aarch64/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-"
 
 .config: arch/arm64/configs/$(KERNEL_DEFCONFIG)
 	$(KERNEL_MAKE) $(KERNEL_DEFCONFIG)
