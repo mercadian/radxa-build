@@ -31,7 +31,7 @@ echo -e "\e[36m Building kernel for ${BOARD} board! \e[0m"
 KERNEL_VERSION=$(cd ${LOCALPATH}/kernel && make kernelversion)
 echo $KERNEL_VERSION
 
-if version_gt "${KERNEL_VERSION}" "4.5"; then
+if version_gt "${KERNEL_VERSION}" "5.11"; then
 	if [ "${DTB_MAINLINE}" ]; then
 		DTB=${DTB_MAINLINE}
 	fi

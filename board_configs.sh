@@ -60,32 +60,46 @@ case ${BOARD} in
 		export CROSS_COMPILE=aarch64-linux-gnu-
 		CHIP="rk3399"
 		;;
-	"rockpi4a")
+	"rk3399-fuhai")
+		DEFCONFIG=rockchip_linux_defconfig
+		UBOOT_DEFCONFIG=fuhai-rk3399_defconfig
+		DTB=rk3399-fuhai.dtb
+		export ARCH=arm64
+		export CROSS_COMPILE=aarch64-linux-gnu-
+		CHIP="rk3399"
+		;;
+	"rk3399-rock-pi-4a")
 		DEFCONFIG=rockchip_linux_defconfig
 		DEFCONFIG_MAINLINE=defconfig
 		UBOOT_DEFCONFIG=rock-pi-4a-rk3399_defconfig
 		DTB=rk3399-rock-pi-4a.dtb
-		DTB_MAINLINE=rk3399-rock-pi-4.dtb
 		export ARCH=arm64
 		export CROSS_COMPILE=aarch64-linux-gnu-
 		CHIP="rk3399"
 		;;
-	"rockpi4b")
+	"rk3399-rock-pi-4b")
 		DEFCONFIG=rockchip_linux_defconfig
 		DEFCONFIG_MAINLINE=defconfig
 		UBOOT_DEFCONFIG=rock-pi-4b-rk3399_defconfig
 		DTB=rk3399-rock-pi-4b.dtb
-		DTB_MAINLINE=rk3399-rock-pi-4.dtb
 		export ARCH=arm64
 		export CROSS_COMPILE=aarch64-linux-gnu-
 		CHIP="rk3399"
 		;;
-	"rockpi4c")
+	"rk3399-rock-pi-4c")
 		DEFCONFIG=rockchip_linux_defconfig
 		DEFCONFIG_MAINLINE=defconfig
 		UBOOT_DEFCONFIG=rock-pi-4c-rk3399_defconfig
 		DTB=rk3399-rock-pi-4c.dtb
-		DTB_MAINLINE=rk3399-rock-pi-4.dtb
+		export ARCH=arm64
+		export CROSS_COMPILE=aarch64-linux-gnu-
+		CHIP="rk3399"
+		;;
+	"rk3399-rock-4c-plus")
+		DEFCONFIG=rockchip_linux_defconfig
+		DEFCONFIG_MAINLINE=defconfig
+		UBOOT_DEFCONFIG=rock-4c-plus-rk3399_defconfig
+		DTB=rk3399-rock-4c-plus.dtb
 		export ARCH=arm64
 		export CROSS_COMPILE=aarch64-linux-gnu-
 		CHIP="rk3399"
@@ -321,3 +335,9 @@ case ${BOARD} in
 		exit -1
 		;;
 esac
+
+#build on native arm64
+if [ "X$(uname -m)" == "Xaarch64" -a "X${ARCH}" == "Xarm64" ]; then
+        unset ARCH
+        unset CROSS_COMPILE
+fi

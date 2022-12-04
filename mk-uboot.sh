@@ -24,6 +24,22 @@ fi
 [ ! -d ${OUT}/u-boot ] && mkdir ${OUT}/u-boot
 [ ! -d ${OUT}/u-boot/spi ] && mkdir ${OUT}/u-boot/spi
 
+SPI_IMAGE=${OUT}/u-boot/spi/spi_image.img
+
+generate_spi_image() {
+	dd if=/dev/zero of=$SPI_IMAGE bs=1M count=0 seek=16
+	parted -s $SPI_IMAGE mklabel gpt
+	parted -s $SPI_IMAGE unit s mkpart idbloader 64 7167
+	parted -s $SPI_IMAGE unit s mkpart vnvm 7168 7679
+	parted -s $SPI_IMAGE unit s mkpart reserved_space 7680 8063
+	parted -s $SPI_IMAGE unit s mkpart reserved1 8064 8127
+	parted -s $SPI_IMAGE unit s mkpart uboot_env 8128 8191
+	parted -s $SPI_IMAGE unit s mkpart reserved2 8192 16383
+	parted -s $SPI_IMAGE unit s mkpart uboot 16384 32734
+	dd if=${OUT}/u-boot/idbloader.img of=$SPI_IMAGE seek=64 conv=notrunc
+	dd if=${OUT}/u-boot/u-boot.itb of=$SPI_IMAGE seek=16384 conv=notrunc
+}
+
 source $LOCALPATH/build/board_configs.sh $BOARD
 
 if [ $? -ne 0 ]; then
@@ -106,11 +122,11 @@ EOF
 elif [ "${CHIP}" == "rk3399" ]; then
 	$TOOLPATH/loaderimage --pack --uboot ./u-boot-dtb.bin uboot.img 0x200000 --size 1024 1
 
-	tools/mkimage -n rk3399 -T rksd -d ../rkbin/bin/rk33/rk3399_ddr_800MHz_v1.20.bin idbloader.img
+	tools/mkimage -n rk3399 -T rksd -d ../rkbin/bin/rk33/rk3399_ddr_800MHz_v1.25.bin idbloader.img
 	cat ../rkbin/bin/rk33/rk3399_miniloader_v1.19.bin >> idbloader.img
 	cp idbloader.img ${OUT}/u-boot/
 
-	tools/mkimage -n rk3399 -T rkspi -d ../rkbin/bin/rk33/rk3399_ddr_800MHz_v1.20.bin idbloader-spi.img
+	tools/mkimage -n rk3399 -T rkspi -d ../rkbin/bin/rk33/rk3399_ddr_800MHz_v1.25.bin idbloader-spi.img
 	cat ../rkbin/bin/rk33/rk3399_miniloader_spinor_v1.14.bin >> idbloader-spi.img
 	cp idbloader-spi.img ${OUT}/u-boot/spi
 
@@ -125,7 +141,7 @@ MINOR=0
 SEC=0
 [BL31_OPTION]
 SEC=1
-PATH=../rkbin/bin/rk33/rk3399_bl31_v1.26.elf
+PATH=../rkbin/bin/rk33/rk3399_bl31_v1.35.elf
 ADDR=0x10000
 [BL32_OPTION]
 SEC=0
@@ -149,7 +165,7 @@ FILL_BYTE=0
 Name=IDBlock
 Flag=0
 Type=2
-File=../rkbin/bin/rk33/rk3399_ddr_800MHz_v1.20.bin,../rkbin/bin/rk33/rk3399_miniloader_spinor_v1.14.bin
+File=../rkbin/bin/rk33/rk3399_ddr_800MHz_v1.25.bin,../rkbin/bin/rk33/rk3399_miniloader_spinor_v1.14.bin
 PartOffset=0x40
 PartSize=0x7C0
 [UserPart2]
@@ -326,25 +342,28 @@ EOF
 	cp trust.img ${OUT}/u-boot/
 elif [ "${CHIP}" == "rk3566" ]; then
 	make ${UBOOT_DEFCONFIG}
-	make BL31=../rkbin/bin/rk35/rk3568_bl31_v1.32.elf spl/u-boot-spl.bin u-boot.dtb u-boot.itb
+	make BL31=../rkbin/bin/rk35/rk3568_bl31_set_pmic_sleep_low_20221018_v1.32.elf spl/u-boot-spl.bin u-boot.dtb u-boot.itb
 	./tools/mkimage -n rk3568 -T rksd -d ../rkbin/bin/rk35/rk3566_ddr_1056MHz_v1.10.bin:spl/u-boot-spl.bin idbloader.img
 	cp u-boot.itb ${OUT}/u-boot/
 	cp idbloader.img ${OUT}/u-boot/
 	cp ../rkbin/bin/rk35/rk356x_spl_loader_ddr1056_v1.10.111.bin ${OUT}/u-boot/
+	generate_spi_image
 elif [ "${CHIP}" == "rk3568" ]; then
 	make ${UBOOT_DEFCONFIG}
-	make BL31=../rkbin/bin/rk35/rk3568_bl31_v1.32.elf spl/u-boot-spl.bin u-boot.dtb u-boot.itb
+	make BL31=../rkbin/bin/rk35/rk3568_bl31_set_pmic_sleep_low_20221018_v1.32.elf spl/u-boot-spl.bin u-boot.dtb u-boot.itb
 	./tools/mkimage -n rk3568 -T rksd -d ../rkbin/bin/rk35/rk3568_ddr_1056MHz_v1.10.bin:spl/u-boot-spl.bin idbloader.img
 	cp u-boot.itb ${OUT}/u-boot/
 	cp idbloader.img ${OUT}/u-boot/
 	cp ../rkbin/bin/rk35/rk356x_spl_loader_ddr1056_v1.10.111.bin ${OUT}/u-boot/
+	generate_spi_image
 elif [ "${CHIP}" == "rk3588s" ] || [ "${CHIP}" == "rk3588" ]; then
 	make ${UBOOT_DEFCONFIG}
-	make BL31=../rkbin/bin/rk35/rk3588_bl31_v1.25.elf spl/u-boot-spl.bin u-boot.dtb u-boot.itb
-	./tools/mkimage -n rk3588 -T rksd -d ../rkbin/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.07.bin:spl/u-boot-spl.bin idbloader.img
+	make BL31=../rkbin/bin/rk35/rk3588_bl31_v1.28.elf spl/u-boot-spl.bin u-boot.dtb u-boot.itb
+	./tools/mkimage -n rk3588 -T rksd -d ../rkbin/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.08.bin:spl/u-boot-spl.bin idbloader.img
 	cp u-boot.itb ${OUT}/u-boot/
 	cp idbloader.img ${OUT}/u-boot/
-	cp ../rkbin/bin/rk35/rk3588_spl_loader_v1.07.111.bin ${OUT}/u-boot
+	cp ../rkbin/bin/rk35/rk3588_spl_loader_v1.08.111.bin ${OUT}/u-boot
+	generate_spi_image
 fi
 
 echo -e "\e[36m U-boot IMAGE READY! \e[0m"

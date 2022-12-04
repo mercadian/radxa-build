@@ -28,6 +28,11 @@ PACKAGES_DIR=$ROCKCHIP_BSP_DIR/out/packages
 [ ! -d "$PACKAGES_DIR" ] && mkdir $PACKAGES_DIR
 KERNEL_DIR=$ROCKCHIP_BSP_DIR/kernel
 
+#build on native arm64
+if [ "X$(uname -m)" == "Xaarch64" ]; then
+        export KERNEL_MAKE="make"
+fi
+
 echo -e "\e[31m Start to pack kernel. \e[0m"
 cd ${KERNEL_DIR} && make distclean && make -f $ROCKCHIP_BSP_DIR/build/kernel-package.mk kernel-package
 
